@@ -1,15 +1,22 @@
 name: Build and push Docker image
 on:
+  push:
   release:
     types: [published]
 
 jobs:
   build-and-push-docker:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
+      - uses: actions/checkout@v2
+      - name: "Set Job Environment Variables"
+        run: |
+          SHA7="${GITHUB_SHA::7}"
+          DOCKER_TAG=$SHA7
+          echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "DOCKER_TAG=${DOCKER_TAG}" >> $GITHUB_ENV
+          echo "MATLAB_PRODUCTS=`cat ci/MATLAB_TOOLBOXES.txt`" >> $GITHUB_ENV
+
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v2
 
@@ -22,14 +29,6 @@ jobs:
           username: openscapes
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: "Set Job Environment Variables"
-      - uses: actions/checkout@v2
-        run: |
-          SHA7="${GITHUB_SHA::7}"
-          DOCKER_TAG=$SHA7
-          echo "RELEASE_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          echo "DOCKER_TAG=${DOCKER_TAG}" >> $GITHUB_ENV
-          echo "MATLAB_PRODUCTS=`cat ci/MATLAB_TOOLBOXES.txt` >> $GITHUB_ENV
 
       - name: "Build and push"
         uses: docker/build-push-action@v4
@@ -39,7 +38,3 @@ jobs:
           build-args: |
             MATLAB_PRODUCT_LIST=$MATLAB_PRODUCTS
           tags: latest, ${{ RELEASE_DATE }}
-
-      - name: "Export Full Conda Environment"
-        run: |
-            docker run openscapes/matlab:main conda list --export
