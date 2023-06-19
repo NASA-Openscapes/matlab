@@ -37,4 +37,4 @@ jobs:
           push: true
           build-args: |
             MATLAB_PRODUCT_LIST=$MATLAB_PRODUCTS
-          tags: latest, ${{ RELEASE_DATE }}
+          tags: latest, ${{ env.RELEASE_DATE }}
