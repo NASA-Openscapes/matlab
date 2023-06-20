@@ -32,11 +32,9 @@ jobs:
 
       - name: "Build and push"
         uses: docker/build-push-action@v4
-        env:
-          MATLAB_PRODUCTS: ${{ env.MATLAB_PRODUCTS }}
         with:
           context: ci
           push: true
           build-args: |
-            MATLAB_PRODUCT_LIST=${{ MATLAB_PRODUCTS }}
+            MATLAB_PRODUCT_LIST=${{ env.MATLAB_PRODUCTS }}
           tags: latest, ${{ env.RELEASE_DATE }}
